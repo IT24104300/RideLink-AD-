@@ -1,0 +1,30 @@
+server:
+  port: ${DRIVER_SERVER_PORT:8082}
+
+spring:
+  application:
+    name: driver-vehicle-service
+  datasource:
+    url: ${DRIVER_DB_URL:jdbc:h2:file:./data/driver-db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    username: ${DRIVER_DB_USER:sa}
+    password: ${DRIVER_DB_PASSWORD:}
+    driver-class-name: ${DRIVER_DB_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+ridelink:
+  jwt:
+    secret: ${JWT_SECRET:ridelink-dev-only-change-me-please-32chars-min}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

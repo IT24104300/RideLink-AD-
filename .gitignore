@@ -1,0 +1,61 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Keep wrapper properties
+!.mvn/wrapper/maven-wrapper.properties
+
+# H2 file databases
+*.mv.db
+*.trace.db
+**/data/
+
+# Environment secrets — never commit real values
+.env
+.env.local
+.env.*.local
+*.pem
+*.p12
+*.jks
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.code-workspace
+.project
+.classpath
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temp
+*.log
+logs/
+tmp/
+*.swp
+*~
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*

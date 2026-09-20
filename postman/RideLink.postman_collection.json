@@ -1,0 +1,438 @@
+{
+  "info": {
+    "name": "RideLink",
+    "description": "IT3130 RideLink — seven required workflows. Import the RideLink Local environment. Login requests save tokens into environment variables when tests run.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Account and access",
+      "item": [
+        {
+          "name": "Register passenger",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"passenger2\",\n  \"password\": \"password\",\n  \"email\": \"passenger2@ridelink.local\",\n  \"fullName\": \"Passenger Two\",\n  \"phone\": \"0770000002\",\n  \"role\": \"PASSENGER\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/register"
+          }
+        },
+        {
+          "name": "Register driver",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"driver2\",\n  \"password\": \"password\",\n  \"email\": \"driver2@ridelink.local\",\n  \"fullName\": \"Driver Two\",\n  \"phone\": \"0770000003\",\n  \"role\": \"DRIVER\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/register"
+          }
+        },
+        {
+          "name": "Login passenger1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('passengerToken', pm.response.json().accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{passengerUser}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/login"
+          }
+        },
+        {
+          "name": "Login driver1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('driverToken', pm.response.json().accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{driverUser}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/login"
+          }
+        },
+        {
+          "name": "Login admin1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('adminToken', pm.response.json().accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUser}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/login"
+          }
+        },
+        {
+          "name": "GET me (passenger)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{passengerToken}}" }],
+            "url": "{{accountUrl}}/api/accounts/me"
+          }
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Demo Passenger Updated\",\n  \"phone\": \"0771111111\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Driver preparation",
+      "item": [
+        {
+          "name": "Upsert vehicle and availability",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{driverToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Demo Driver\",\n  \"vehicleMake\": \"Toyota\",\n  \"vehicleModel\": \"Axio\",\n  \"vehiclePlate\": \"CAB-1234\",\n  \"vehicleColor\": \"White\",\n  \"available\": true,\n  \"serviceArea\": \"Colombo\",\n  \"locationLabel\": \"Colombo Fort\",\n  \"latitude\": 6.9344,\n  \"longitude\": 79.8428\n}"
+            },
+            "url": "{{driverUrl}}/api/drivers/me"
+          }
+        },
+        {
+          "name": "GET my driver profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{driverToken}}" }],
+            "url": "{{driverUrl}}/api/drivers/me"
+          }
+        },
+        {
+          "name": "List eligible drivers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{passengerToken}}" }],
+            "url": "{{driverUrl}}/api/drivers/eligible?pickup={{pickup}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Fare estimation",
+      "item": [
+        {
+          "name": "Estimate fare",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.environment.set('fareId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickup\": \"{{pickup}}\",\n  \"destination\": \"{{destination}}\"\n}"
+            },
+            "url": "{{fareUrl}}/api/fares/estimate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Ride request and assignment",
+      "item": [
+        {
+          "name": "Create ride request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('rideId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickup\": \"{{pickup}}\",\n  \"destination\": \"{{destination}}\"\n}"
+            },
+            "url": "{{rideUrl}}/api/rides"
+          }
+        },
+        {
+          "name": "Assign first eligible driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/assign"
+          }
+        },
+        {
+          "name": "Get ride",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{passengerToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Ride lifecycle",
+      "item": [
+        {
+          "name": "Driver accept",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{driverToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/accept"
+          }
+        },
+        {
+          "name": "Driver start",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{driverToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/start"
+          }
+        },
+        {
+          "name": "Driver complete",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{driverToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/complete"
+          }
+        },
+        {
+          "name": "Cancel (use on a fresh REQUESTED ride)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{passengerToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Completion and payment",
+      "item": [
+        {
+          "name": "Final fare (direct)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('fareId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{driverToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickup\": \"{{pickup}}\",\n  \"destination\": \"{{destination}}\",\n  \"rideId\": \"{{rideId}}\"\n}"
+            },
+            "url": "{{fareUrl}}/api/fares/final"
+          }
+        },
+        {
+          "name": "Simulated payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('paymentId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"fareId\": \"{{fareId}}\",\n  \"amount\": 1250.00,\n  \"currency\": \"LKR\",\n  \"method\": \"CARD_SIMULATED\",\n  \"cardLast4\": \"4242\",\n  \"simulateFailure\": false\n}"
+            },
+            "url": "{{fareUrl}}/api/payments"
+          }
+        },
+        {
+          "name": "Get receipt",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{passengerToken}}" }],
+            "url": "{{fareUrl}}/api/payments/{{paymentId}}/receipt"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Negative scenarios",
+      "item": [
+        {
+          "name": "Unauthorised — missing token",
+          "request": {
+            "method": "GET",
+            "url": "{{accountUrl}}/api/accounts/me"
+          }
+        },
+        {
+          "name": "Forbidden — passenger hits driver upsert",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleMake\": \"X\",\n  \"vehicleModel\": \"Y\",\n  \"vehiclePlate\": \"NA\",\n  \"available\": true,\n  \"serviceArea\": \"Colombo\"\n}"
+            },
+            "url": "{{driverUrl}}/api/drivers/me"
+          }
+        },
+        {
+          "name": "Invalid input — short password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"x\",\n  \"password\": \"short\",\n  \"email\": \"not-an-email\",\n  \"fullName\": \"X\",\n  \"role\": \"PASSENGER\"\n}"
+            },
+            "url": "{{accountUrl}}/api/accounts/register"
+          }
+        },
+        {
+          "name": "Invalid status transition (complete a REQUESTED ride)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{driverToken}}" }],
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/complete"
+          }
+        },
+        {
+          "name": "Simulated payment failure",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"amount\": 100.00,\n  \"cardLast4\": \"0000\",\n  \"simulateFailure\": true\n}"
+            },
+            "url": "{{fareUrl}}/api/payments"
+          }
+        },
+        {
+          "name": "No available driver (set driver unavailable first, then assign)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{passengerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{rideUrl}}/api/rides/{{rideId}}/assign"
+          }
+        }
+      ]
+    }
+  ]
+}

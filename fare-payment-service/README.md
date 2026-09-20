@@ -1,0 +1,1 @@
+Fare & Payment Service — Member 4. Port 8084. Formula: `base + (distanceKm * perKm) + (durationMin * perMin)`. Simulated payments fail when `cardLast4=0000` or `simulateFailure=true`. See the root README.

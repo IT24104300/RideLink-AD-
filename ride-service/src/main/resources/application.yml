@@ -1,0 +1,33 @@
+server:
+  port: ${RIDE_SERVER_PORT:8083}
+
+spring:
+  application:
+    name: ride-service
+  datasource:
+    url: ${RIDE_DB_URL:jdbc:h2:file:./data/ride-db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    username: ${RIDE_DB_USER:sa}
+    password: ${RIDE_DB_PASSWORD:}
+    driver-class-name: ${RIDE_DB_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+ridelink:
+  jwt:
+    secret: ${JWT_SECRET:ridelink-dev-only-change-me-please-32chars-min}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  clients:
+    driver-base-url: ${DRIVER_SERVICE_URL:http://localhost:8082}
+    fare-base-url: ${FARE_SERVICE_URL:http://localhost:8084}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
