@@ -4,6 +4,7 @@ import com.ridelink.common.security.SecurityUtils;
 import com.ridelink.common.security.UserPrincipal;
 import com.ridelink.ride.dto.RideDtos.AssignRideRequest;
 import com.ridelink.ride.dto.RideDtos.CreateRideRequest;
+import com.ridelink.ride.dto.RideDtos.RecordPaymentRequest;
 import com.ridelink.ride.dto.RideDtos.RideResponse;
 import com.ridelink.ride.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,5 +92,12 @@ public class RideController {
     @Operation(summary = "Cancel a ride if the transition is valid")
     public RideResponse cancel(@PathVariable UUID id) {
         return rideService.cancel(id, SecurityUtils.currentUser());
+    }
+
+    @PostMapping("/{id}/payment")
+    @PreAuthorize("hasAnyRole('PASSENGER','ADMIN')")
+    @Operation(summary = "Attach a completed payment id to this ride")
+    public RideResponse recordPayment(@PathVariable UUID id, @Valid @RequestBody RecordPaymentRequest request) {
+        return rideService.recordPayment(id, request, SecurityUtils.currentUser());
     }
 }

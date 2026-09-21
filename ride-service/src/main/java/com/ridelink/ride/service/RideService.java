@@ -14,6 +14,7 @@ import com.ridelink.ride.dto.RideDtos.AssignRideRequest;
 import com.ridelink.ride.dto.RideDtos.CreateRideRequest;
 import com.ridelink.ride.dto.RideDtos.EligibleDriverView;
 import com.ridelink.ride.dto.RideDtos.FareView;
+import com.ridelink.ride.dto.RideDtos.RecordPaymentRequest;
 import com.ridelink.ride.dto.RideDtos.RideResponse;
 import com.ridelink.ride.repo.RideRepository;
 import org.slf4j.Logger;
@@ -146,6 +147,20 @@ public class RideService {
             throw new ForbiddenException("Only the passenger, assigned driver, or admin may cancel");
         }
         transition(ride, RideStatus.CANCELLED);
+        return toResponse(rides.save(ride));
+    }
+
+    @Transactional
+    public RideResponse recordPayment(UUID rideId, RecordPaymentRequest request, UserPrincipal user) {
+        Ride ride = require(rideId);
+        assertPassengerOrAdmin(ride, user);
+        if (ride.getStatus() != RideStatus.COMPLETED) {
+            throw new BadRequestException(
+                    "INVALID_TRANSITION",
+                    "Payment can only be attached to a COMPLETED ride"
+            );
+        }
+        ride.setPaymentId(request.paymentId());
         return toResponse(rides.save(ride));
     }
 

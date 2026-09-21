@@ -2,6 +2,7 @@ package com.ridelink.ride.dto;
 
 import com.ridelink.ride.domain.RideStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,6 +22,11 @@ public final class RideDtos {
     public record AssignRideRequest(
             UUID driverProfileId,
             UUID driverAccountId
+    ) {
+    }
+
+    public record RecordPaymentRequest(
+            @NotNull UUID paymentId
     ) {
     }
 

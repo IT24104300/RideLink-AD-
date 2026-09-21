@@ -9,6 +9,7 @@ import com.ridelink.ride.domain.Ride;
 import com.ridelink.ride.domain.RideStatus;
 import com.ridelink.ride.dto.RideDtos.AssignRideRequest;
 import com.ridelink.ride.dto.RideDtos.EligibleDriverView;
+import com.ridelink.ride.dto.RideDtos.RecordPaymentRequest;
 import com.ridelink.ride.repo.RideRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,28 @@ class RideServiceTest {
         Ride ride = requestedRide();
         assertThrows(BadRequestException.class, () -> RideService.transition(ride, RideStatus.COMPLETED));
         assertEquals(RideStatus.REQUESTED, ride.getStatus());
+    }
+
+    @Test
+    void recordPaymentAttachesIdOnCompletedRide() {
+        Ride ride = requestedRide();
+        ride.setStatus(RideStatus.COMPLETED);
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+        when(rides.save(any(Ride.class))).thenAnswer(inv -> inv.getArgument(0));
+        UUID paymentId = UUID.fromString("55555555-5555-5555-5555-555555555555");
+
+        var result = service.recordPayment(ride.getId(), new RecordPaymentRequest(paymentId), passenger);
+
+        assertEquals(paymentId, result.paymentId());
+    }
+
+    @Test
+    void recordPaymentRejectedUnlessCompleted() {
+        Ride ride = requestedRide();
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+
+        assertThrows(BadRequestException.class,
+                () -> service.recordPayment(ride.getId(), new RecordPaymentRequest(UUID.randomUUID()), passenger));
     }
 
     private Ride requestedRide() {

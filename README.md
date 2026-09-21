@@ -120,9 +120,12 @@ Passenger / Driver / Admin  →  Swagger or Postman
 
 Ride Service  --sync REST-->  Driver & Vehicle  GET /api/drivers/eligible
 Ride Service  --sync REST-->  Fare & Payment    POST /api/fares/final
+Fare & Payment --sync REST-->  Ride Service      POST /api/rides/{id}/payment
 ```
 
-Details, data ownership, and a happy-path sequence: [`docs/architecture.md`](docs/architecture.md).
+Details, data ownership, and a happy-path sequence: [`docs/architecture.md`](docs/architecture.md).  
+Viva one-pager: [`docs/viva-cheat-sheet.md`](docs/viva-cheat-sheet.md).  
+What each member runs: [`docs/member-guide.md`](docs/member-guide.md).
 
 ## Interservice communication (LO2)
 
@@ -132,6 +135,7 @@ Both implemented interactions are **synchronous REST** via Spring `RestClient`, 
 | --- | --- | --- |
 | Ride → Driver: eligible drivers | Assignment needs the list **before** the HTTP response. Immediate consistency. | Async queue would delay assignment and complicate the demo. |
 | Ride → Fare: final fare on complete | Completion wants a fare in the same user action. | Async “fare calculated” event is a reasonable later enhancement if fare calculation becomes slow/retryable. |
+| Fare → Ride: attach `paymentId` | Payment success should be visible on the ride immediately. | Async “payment completed” event if payment retries become common. |
 
 If Fare Service is down on complete, the ride is still marked **COMPLETED** and `fareNote` records the failure (negative path). If no eligible driver exists, assign returns **409** `NO_DRIVER_AVAILABLE`.
 
@@ -202,8 +206,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Short version: feature branches, pull 
 | 3 | Fare estimation | **Working:** `POST /api/fares/estimate` with documented formula |
 | 4 | Ride request and assignment | **Working:** create ride; assign calls driver service (or 409 if none) |
 | 5 | Ride lifecycle | **Working:** accept / start / complete / cancel with transition validation |
-| 6 | Completion and payment | **Partial:** complete calls fare service; simulated payment + receipt endpoints exist. Wire payment id back onto the ride, richer receipts, and Postman happy-path polish still TODO |
-| 7 | Negative scenarios | **Working stubs:** no driver, invalid transition, unauthorised/invalid token, simulated payment fail (`cardLast4=0000`). Expand integration/Postman evidence |
+| 6 | Completion and payment | **Working:** complete calls fare service; simulated payment + receipt; successful pay attaches `paymentId` onto the ride (Fare → Ride REST). If Ride is down, payment still saves. |
+| 7 | Negative scenarios | **Working:** no driver, invalid transition, unauthorised/invalid token, simulated payment fail (`cardLast4=0000`). Capture Postman/CI evidence for the report. |
 
 ## Suggested next implementation order
 
@@ -211,8 +215,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Short version: feature branches, pull 
 2. Member 1: extra account tests (duplicate username, suspend then login) and admin listing if desired.
 3. Member 2: more than one seeded driver / unavailable driver for demo negatives; maybe a PATCH for availability only.
 4. Member 3: persist assignment attempts, handle driver-service downtime explicitly, optional async “driver offered ride” later if the group wants an LO2 contrast.
-5. Member 4: persist receipt PDF-or-JSON document, link payment to ride (Ride Service callback or passenger-driven update).
-6. Group: run the Postman collection end-to-end, capture screenshots for the report, add a release tag at submission.
+5. Member 4: receipt wording / optional PDF later; payment already links onto the ride.
+6. Group: run the Postman collection end-to-end, screenshots for the report, add a release tag at submission.
 
 ## Assignment rule reminder
 

@@ -24,6 +24,8 @@ ridelink:
   jwt:
     secret: ${JWT_SECRET:ridelink-dev-only-change-me-please-32chars-min}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  clients:
+    ride-base-url: ${RIDE_SERVICE_URL:http://localhost:8083}
   fare:
     currency: LKR
     base: 150

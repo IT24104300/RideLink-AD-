@@ -2,6 +2,8 @@ package com.ridelink.fare.service;
 
 import com.ridelink.common.exception.BadRequestException;
 import com.ridelink.common.exception.NotFoundException;
+import com.ridelink.common.exception.UpstreamException;
+import com.ridelink.fare.client.RideServiceClient;
 import com.ridelink.fare.config.FareProperties;
 import com.ridelink.fare.domain.FareQuote;
 import com.ridelink.fare.domain.FareType;
@@ -13,6 +15,8 @@ import com.ridelink.fare.dto.FareDtos.PaymentRequest;
 import com.ridelink.fare.dto.FareDtos.PaymentResponse;
 import com.ridelink.fare.repo.FareQuoteRepository;
 import com.ridelink.fare.repo.PaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +27,23 @@ public class FarePaymentService {
 
     public static final String FORMULA = "base + (distanceKm * perKm) + (durationMin * perMin)";
 
+    private static final Logger log = LoggerFactory.getLogger(FarePaymentService.class);
+
     private final FareQuoteRepository quotes;
     private final PaymentRepository payments;
     private final FareProperties fareProperties;
+    private final RideServiceClient rideServiceClient;
 
     public FarePaymentService(
             FareQuoteRepository quotes,
             PaymentRepository payments,
-            FareProperties fareProperties
+            FareProperties fareProperties,
+            RideServiceClient rideServiceClient
     ) {
         this.quotes = quotes;
         this.payments = payments;
         this.fareProperties = fareProperties;
+        this.rideServiceClient = rideServiceClient;
     }
 
     @Transactional
@@ -56,10 +65,11 @@ public class FarePaymentService {
     }
 
     @Transactional
-    public PaymentResponse pay(UUID accountId, PaymentRequest request) {
+    public PaymentResponse pay(UUID accountId, PaymentRequest request, String authorizationHeader) {
         boolean fail = Boolean.TRUE.equals(request.simulateFailure())
                 || "0000".equals(request.cardLast4());
         Payment payment = new Payment();
+        payment.setId(UUID.randomUUID());
         payment.setRideId(request.rideId());
         payment.setFareId(request.fareId());
         payment.setAccountId(accountId);
@@ -73,7 +83,16 @@ public class FarePaymentService {
             payment.setStatus(PaymentStatus.COMPLETED);
             payment.setReceiptNumber("RL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
-        return toPayment(payments.save(payment));
+        Payment saved = payments.save(payment);
+        if (saved.getStatus() == PaymentStatus.COMPLETED && saved.getId() != null) {
+            try {
+                rideServiceClient.attachPayment(saved.getRideId(), saved.getId(), authorizationHeader);
+            } catch (UpstreamException ex) {
+                log.warn("Ride Service unavailable while attaching payment {} to ride {}: {}",
+                        saved.getId(), saved.getRideId(), ex.getMessage());
+            }
+        }
+        return toPayment(saved);
     }
 
     @Transactional(readOnly = true)

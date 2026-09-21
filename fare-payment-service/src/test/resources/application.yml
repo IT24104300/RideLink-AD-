@@ -10,3 +10,5 @@ spring:
 ridelink:
   jwt:
     secret: ridelink-dev-only-change-me-please-32chars-min
+  clients:
+    ride-base-url: http://localhost:8083

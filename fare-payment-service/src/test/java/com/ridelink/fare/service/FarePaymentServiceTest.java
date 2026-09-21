@@ -1,6 +1,7 @@
 package com.ridelink.fare.service;
 
 import com.ridelink.common.exception.BadRequestException;
+import com.ridelink.fare.client.RideServiceClient;
 import com.ridelink.fare.config.FareProperties;
 import com.ridelink.fare.domain.Payment;
 import com.ridelink.fare.domain.PaymentStatus;
@@ -21,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,13 +33,15 @@ class FarePaymentServiceTest {
     private FareQuoteRepository quotes;
     @Mock
     private PaymentRepository payments;
+    @Mock
+    private RideServiceClient rideServiceClient;
 
     private FarePaymentService service;
 
     @BeforeEach
     void setUp() {
         FareProperties properties = new FareProperties();
-        service = new FarePaymentService(quotes, payments, properties);
+        service = new FarePaymentService(quotes, payments, properties, rideServiceClient);
     }
 
     @Test
@@ -49,16 +54,19 @@ class FarePaymentServiceTest {
     void simulatedCard0000Fails() {
         when(payments.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
         var result = service.pay(UUID.randomUUID(), new PaymentRequest(
-                UUID.randomUUID(), null, new BigDecimal("500.00"), "LKR", "CARD_SIMULATED", "0000", false));
+                UUID.randomUUID(), null, new BigDecimal("500.00"), "LKR", "CARD_SIMULATED", "0000", false), "Bearer test");
         assertEquals(PaymentStatus.FAILED, result.status());
+        verify(rideServiceClient, never()).attachPayment(any(), any(), any());
     }
 
     @Test
     void successfulPaymentIssuesReceipt() {
+        UUID rideId = UUID.randomUUID();
         when(payments.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
         var result = service.pay(UUID.randomUUID(), new PaymentRequest(
-                UUID.randomUUID(), null, new BigDecimal("500.00"), "LKR", "CARD_SIMULATED", "4242", false));
+                rideId, null, new BigDecimal("500.00"), "LKR", "CARD_SIMULATED", "4242", false), "Bearer test");
         assertEquals(PaymentStatus.COMPLETED, result.status());
         assertNotNull(result.receiptNumber());
+        verify(rideServiceClient).attachPayment(rideId, result.id(), "Bearer test");
     }
 }

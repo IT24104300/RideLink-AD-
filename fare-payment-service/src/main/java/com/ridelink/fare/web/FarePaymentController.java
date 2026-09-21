@@ -8,7 +8,9 @@ import com.ridelink.fare.dto.FareDtos.PaymentResponse;
 import com.ridelink.fare.service.FarePaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,8 +59,12 @@ public class FarePaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('PASSENGER','ADMIN')")
     @Operation(summary = "Record a simulated payment (cardLast4=0000 or simulateFailure=true fails)")
-    public PaymentResponse pay(@Valid @RequestBody PaymentRequest request) {
-        return farePaymentService.pay(SecurityUtils.currentUser().accountId(), request);
+    public PaymentResponse pay(@Valid @RequestBody PaymentRequest request, HttpServletRequest httpRequest) {
+        return farePaymentService.pay(
+                SecurityUtils.currentUser().accountId(),
+                request,
+                httpRequest.getHeader(HttpHeaders.AUTHORIZATION)
+        );
     }
 
     @GetMapping("/api/payments/{id}")

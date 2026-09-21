@@ -52,6 +52,9 @@ Public paths: health, OpenAPI/Swagger, and Account `register`/`login`.
 2. **Ride → Fare** `POST /api/fares/final`  
    Completion wants a fare immediately. If Fare Service is down, Ride still transitions to `COMPLETED` and records `fareNote` (graceful degradation).
 
+3. **Fare → Ride** `POST /api/rides/{id}/payment`  
+   After a simulated payment succeeds, Fare Service writes `paymentId` onto the ride. If Ride Service is down, the payment record still exists and the attach can be retried from Swagger.
+
 **Optional later (async):** after `COMPLETED`, publish `RideCompleted` so Fare Service can retry independently, or notify the driver of a new assignment. That would be a good LO2 contrast in the report; it is not required for the scaffold.
 
 gRPC was considered for the eligible-driver call (typed contract, slightly lower latency) and rejected for this assignment: all official clients are HTTP (Swagger/Postman), and adding protobuf would not improve marks unless the group can explain it in the viva.
@@ -94,6 +97,8 @@ sequenceDiagram
   R->>F: POST /api/fares/final
   F-->>R: final total
   P->>F: POST /api/payments
+  F->>R: POST /api/rides/{id}/payment
+  R-->>F: ride.paymentId set
   F-->>P: COMPLETED + receiptNumber
 ```
 
