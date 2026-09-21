@@ -1,0 +1,10 @@
+# Replace GitHub usernames in OWNERS.md, then keep this file in sync.
+# Until then, reviews are requested from any group member.
+
+* @IT24104300
+
+/services/account-service/ @IT24104300
+/services/driver-vehicle-service/ @IT24104300
+/services/ride-service/ @IT24104300
+/services/fare-payment-service/ @IT24104300
+/libs/ridelink-common/ @IT24104300

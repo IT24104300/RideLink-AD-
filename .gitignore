@@ -52,6 +52,13 @@ tmp/
 *.swp
 *~
 
+# Leftover local folders from the pre-restructure layout (H2/target locks)
+/account-service/
+/driver-vehicle-service/
+/ride-service/
+/fare-payment-service/
+/ridelink-common/
+
 # Java
 *.class
 *.jar

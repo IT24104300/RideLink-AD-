@@ -109,14 +109,14 @@ A modular monolith would share one deployable and one database, with simpler tra
 ## Folder structure
 
 ```
-Pro/
+RideLink-AD-/
   pom.xml
-  ridelink-common/          shared JWT, error body, exceptions
-  account-service/
-  driver-vehicle-service/
-  ride-service/
-  fare-payment-service/
-  docs/architecture.md
+  libs/ridelink-common/          shared JWT, error body, exceptions
+  services/account-service/
+  services/driver-vehicle-service/
+  services/ride-service/
+  services/fare-payment-service/
+  docs/
   postman/
   .github/workflows/ci.yml
 ```

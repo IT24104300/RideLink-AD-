@@ -16,10 +16,10 @@ $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.11.10-hotspot"
 Start **Account → Driver → Fare → Ride** (four terminals, from repo root).
 
 ```powershell
-.\mvnw.cmd -pl account-service -am spring-boot:run
-.\mvnw.cmd -pl driver-vehicle-service -am spring-boot:run
-.\mvnw.cmd -pl fare-payment-service -am spring-boot:run
-.\mvnw.cmd -pl ride-service -am spring-boot:run
+.\mvnw.cmd -pl services/account-service -am spring-boot:run
+.\mvnw.cmd -pl services/driver-vehicle-service -am spring-boot:run
+.\mvnw.cmd -pl services/fare-payment-service -am spring-boot:run
+.\mvnw.cmd -pl services/ride-service -am spring-boot:run
 ```
 
 macOS / Linux: `./mvnw` instead of `.\mvnw.cmd`.
@@ -33,10 +33,10 @@ Tests (whole project):
 One member’s tests only:
 
 ```powershell
-.\mvnw.cmd -pl account-service -am test
-.\mvnw.cmd -pl driver-vehicle-service -am test
-.\mvnw.cmd -pl ride-service -am test
-.\mvnw.cmd -pl fare-payment-service -am test
+.\mvnw.cmd -pl services/account-service -am test
+.\mvnw.cmd -pl services/driver-vehicle-service -am test
+.\mvnw.cmd -pl services/ride-service -am test
+.\mvnw.cmd -pl services/fare-payment-service -am test
 ```
 
 ## IntelliJ (any member)
@@ -64,15 +64,15 @@ Then open a pull request on GitHub. Another member reviews. Do not commit secret
 
 ## Member 1 — Account Service (8081)
 
-**Folder:** `account-service`  
+**Folder:** `services/account-service`  
 **Main class:** `com.ridelink.account.AccountServiceApplication`  
 **Swagger:** http://127.0.0.1:8081/swagger-ui.html  
 
 You own registration, login, JWT, roles, profile, account status.
 
 ```powershell
-.\mvnw.cmd -pl account-service -am spring-boot:run
-.\mvnw.cmd -pl account-service -am test
+.\mvnw.cmd -pl services/account-service -am spring-boot:run
+.\mvnw.cmd -pl services/account-service -am test
 ```
 
 **Swagger you run in the demo**
@@ -94,15 +94,15 @@ You own registration, login, JWT, roles, profile, account status.
 
 ## Member 2 — Driver & Vehicle Service (8082)
 
-**Folder:** `driver-vehicle-service`  
+**Folder:** `services/driver-vehicle-service`  
 **Main class:** `com.ridelink.driver.DriverVehicleServiceApplication`  
 **Swagger:** http://127.0.0.1:8082/swagger-ui.html  
 
 You own vehicle, availability, service area, simulated location, eligible-driver list.
 
 ```powershell
-.\mvnw.cmd -pl driver-vehicle-service -am spring-boot:run
-.\mvnw.cmd -pl driver-vehicle-service -am test
+.\mvnw.cmd -pl services/driver-vehicle-service -am spring-boot:run
+.\mvnw.cmd -pl services/driver-vehicle-service -am test
 ```
 
 **Swagger you run in the demo** (Authorize with **driver1** token from 8081)
@@ -134,15 +134,15 @@ You own vehicle, availability, service area, simulated location, eligible-driver
 
 ## Member 3 — Ride Service (8083)
 
-**Folder:** `ride-service`  
+**Folder:** `services/ride-service`  
 **Main class:** `com.ridelink.ride.RideServiceApplication`  
 **Swagger:** http://127.0.0.1:8083/swagger-ui.html  
 
 You own ride request, assignment, lifecycle, and storing `fareId` / `paymentId` as references.
 
 ```powershell
-.\mvnw.cmd -pl ride-service -am spring-boot:run
-.\mvnw.cmd -pl ride-service -am test
+.\mvnw.cmd -pl services/ride-service -am spring-boot:run
+.\mvnw.cmd -pl services/ride-service -am test
 ```
 
 **Swagger you run in the demo**
@@ -175,15 +175,15 @@ Negatives: assign with pickup `Jaffna` → `409`; complete a `REQUESTED` ride �
 
 ## Member 4 — Fare & Payment Service (8084)
 
-**Folder:** `fare-payment-service`  
+**Folder:** `services/fare-payment-service`  
 **Main class:** `com.ridelink.fare.FarePaymentServiceApplication`  
 **Swagger:** http://127.0.0.1:8084/swagger-ui.html  
 
 You own fare estimate/final, simulated payment, receipt, and notifying Ride of `paymentId`.
 
 ```powershell
-.\mvnw.cmd -pl fare-payment-service -am spring-boot:run
-.\mvnw.cmd -pl fare-payment-service -am test
+.\mvnw.cmd -pl services/fare-payment-service -am spring-boot:run
+.\mvnw.cmd -pl services/fare-payment-service -am test
 ```
 
 **Swagger you run in the demo** (passenger token)

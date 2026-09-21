@@ -15,6 +15,8 @@ Examples:
 
 - `feature/account-service/suspend-endpoint`
 - `feature/ride-service/no-driver-path`
+
+Work mainly in `services/<your-service>/`. Shared JWT/errors live in `libs/ridelink-common/`.
 - `docs/architecture-sequence`
 
 ## Workflow

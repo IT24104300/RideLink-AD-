@@ -1,6 +1,36 @@
-# RideLink — IT3130 Application Development Group Assignment
+# RideLink
 
-Backend-only microservices for a fictional ride-sharing platform. Demo via **Swagger UI** and the shared **Postman collection**. No frontend is required. Due **01/10/2026**.
+[![CI](https://github.com/IT24104300/RideLink-AD-/actions/workflows/ci.yml/badge.svg)](https://github.com/IT24104300/RideLink-AD-/actions/workflows/ci.yml)
+
+IT3130 Application Development — **backend microservices** for a fictional ride-sharing platform. Demo via **Swagger UI** and Postman. No frontend is required. Due **01/10/2026**.
+
+- **Repo:** https://github.com/IT24104300/RideLink-AD-
+- **Brief:** [`docs/assignment/IT3130_AD_Group_Assignment_RideLink_Student_Release.pdf`](docs/assignment/IT3130_AD_Group_Assignment_RideLink_Student_Release.pdf)
+
+## Repository layout
+
+```text
+RideLink-AD-/
+├── .github/                          GitHub Actions, PR template, CODEOWNERS
+│   └── workflows/ci.yml
+├── docs/                             Architecture, viva notes, assignment PDF
+├── postman/                          Shared collection + environment
+├── libs/
+│   └── ridelink-common/              Shared JWT, errors (not a 5th service)
+├── services/
+│   ├── account-service/              Member 1 — port 8081
+│   ├── driver-vehicle-service/       Member 2 — port 8082
+│   ├── ride-service/                 Member 3 — port 8083
+│   └── fare-payment-service/         Member 4 — port 8084
+├── pom.xml                           Maven parent
+├── mvnw / mvnw.cmd                   Maven Wrapper
+├── .env.example                      Dev env template (no secrets)
+├── CONTRIBUTING.md
+├── LICENSE
+└── README.md
+```
+
+Each service is a normal Maven module: `src/main/java`, `src/main/resources`, `src/test/java`.
 
 ## Stack and why
 
@@ -10,7 +40,7 @@ Lab notes and nearby projects did **not** prescribe a stack. The brief says to u
 | --- | --- |
 | **Java 17** (runs on JDK 17+) | Common in IT modules, Spring Boot 3 baseline, matches the assignment “approved during labs” default if the lab used Spring. |
 | **Spring Boot 3.4.x** | REST, JPA, validation, security, and Actuator health with little ceremony. |
-| **Maven** (parent POM + 4 service modules + `ridelink-common`) | Each service is still an independently runnable Spring Boot app (`-pl <service> -am spring-boot:run`). |
+| **Maven** (parent POM + `libs/` + `services/`) | Each service is still independently runnable (`-pl services/<name> -am spring-boot:run`). |
 | **H2 file DB per service** | No Docker required for local/CI. Postgres is documented as an optional later swap. |
 | **Spring Security + JWT** | Account Service issues tokens; other services validate the same secret and enforce `PASSENGER` / `DRIVER` / `ADMIN`. |
 | **springdoc-openapi** | Official demo interface (Swagger UI) on every service. |
@@ -24,10 +54,10 @@ Fill names in [`OWNERS.md`](OWNERS.md).
 
 | # | Service | Folder | Port | Swagger UI | Primary owner |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Account Service | `account-service` | 8081 | http://localhost:8081/swagger-ui.html | Member 1 |
-| 2 | Driver & Vehicle Service | `driver-vehicle-service` | 8082 | http://localhost:8082/swagger-ui.html | Member 2 |
-| 3 | Ride Management Service | `ride-service` | 8083 | http://localhost:8083/swagger-ui.html | Member 3 |
-| 4 | Fare & Payment Service | `fare-payment-service` | 8084 | http://localhost:8084/swagger-ui.html | Member 4 |
+| 1 | Account Service | `services/account-service` | 8081 | http://localhost:8081/swagger-ui.html | Member 1 |
+| 2 | Driver & Vehicle Service | `services/driver-vehicle-service` | 8082 | http://localhost:8082/swagger-ui.html | Member 2 |
+| 3 | Ride Management Service | `services/ride-service` | 8083 | http://localhost:8083/swagger-ui.html | Member 3 |
+| 4 | Fare & Payment Service | `services/fare-payment-service` | 8084 | http://localhost:8084/swagger-ui.html | Member 4 |
 
 API Gateway, Eureka, and a config server are **not** one of the four core services and are not included.
 
@@ -43,10 +73,10 @@ API Gateway, Eureka, and a config server are **not** one of the four core servic
 From the repository root (Windows PowerShell):
 
 ```powershell
-.\mvnw.cmd -pl account-service -am spring-boot:run
-.\mvnw.cmd -pl driver-vehicle-service -am spring-boot:run
-.\mvnw.cmd -pl ride-service -am spring-boot:run
-.\mvnw.cmd -pl fare-payment-service -am spring-boot:run
+.\mvnw.cmd -pl services/account-service -am spring-boot:run
+.\mvnw.cmd -pl services/driver-vehicle-service -am spring-boot:run
+.\mvnw.cmd -pl services/ride-service -am spring-boot:run
+.\mvnw.cmd -pl services/fare-payment-service -am spring-boot:run
 ```
 
 Use four terminals. Start-up **order** (so interservice calls succeed):
@@ -125,7 +155,8 @@ Fare & Payment --sync REST-->  Ride Service      POST /api/rides/{id}/payment
 
 Details, data ownership, and a happy-path sequence: [`docs/architecture.md`](docs/architecture.md).  
 Viva one-pager: [`docs/viva-cheat-sheet.md`](docs/viva-cheat-sheet.md).  
-What each member runs: [`docs/member-guide.md`](docs/member-guide.md).
+What each member runs: [`docs/member-guide.md`](docs/member-guide.md).  
+Docs index: [`docs/README.md`](docs/README.md).
 
 ## Interservice communication (LO2)
 
