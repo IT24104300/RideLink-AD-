@@ -13,6 +13,7 @@ import com.ridelink.fare.dto.FareDtos.EstimateRequest;
 import com.ridelink.fare.dto.FareDtos.FareResponse;
 import com.ridelink.fare.dto.FareDtos.PaymentRequest;
 import com.ridelink.fare.dto.FareDtos.PaymentResponse;
+import com.ridelink.fare.dto.FareDtos.ReceiptResponse;
 import com.ridelink.fare.repo.FareQuoteRepository;
 import com.ridelink.fare.repo.PaymentRepository;
 import org.slf4j.Logger;
@@ -98,6 +99,30 @@ public class FarePaymentService {
     @Transactional(readOnly = true)
     public PaymentResponse getPayment(UUID id) {
         return toPayment(payments.findById(id).orElseThrow(() -> new NotFoundException("Payment not found")));
+    }
+
+    @Transactional(readOnly = true)
+    public ReceiptResponse getReceipt(UUID id) {
+        Payment payment = payments.findById(id).orElseThrow(() -> new NotFoundException("Payment not found"));
+        String merchant = "RideLink Platforms Ltd";
+        String summary = payment.getStatus() == PaymentStatus.COMPLETED
+                ? "Official payment receipt for ride " + payment.getRideId() + " (" + payment.getAmount() + " " + payment.getCurrency() + ")"
+                : "Payment attempt status: " + payment.getStatus() + " - " + (payment.getFailureReason() != null ? payment.getFailureReason() : "Declined");
+        return new ReceiptResponse(
+                payment.getId(),
+                payment.getId(),
+                payment.getRideId(),
+                payment.getFareId(),
+                payment.getAccountId(),
+                payment.getReceiptNumber(),
+                payment.getStatus(),
+                payment.getAmount(),
+                payment.getCurrency(),
+                payment.getMethod(),
+                merchant,
+                summary,
+                payment.getCreatedAt()
+        );
     }
 
     private FareResponse persistQuote(EstimateRequest request, FareType type) {

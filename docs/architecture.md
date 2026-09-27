@@ -111,12 +111,22 @@ A modular monolith would share one deployable and one database, with simpler tra
 ```
 RideLink-AD-/
   pom.xml
+  Dockerfile                     multi-stage containerization for all services
+  docker-compose.yml             local orchestration with healthchecks & network wiring
   libs/ridelink-common/          shared JWT, error body, exceptions
-  services/account-service/
-  services/driver-vehicle-service/
-  services/ride-service/
-  services/fare-payment-service/
-  docs/
-  postman/
-  .github/workflows/ci.yml
+  services/account-service/      port 8081
+  services/driver-vehicle-service/ port 8082
+  services/ride-service/         port 8083
+  services/fare-payment-service/ port 8084
+  docs/                          architecture, member guide, viva cheat sheet
+  postman/                       shared collection & environment
+  .github/workflows/ci.yml       GitHub Actions automated CI pipeline
 ```
+
+## Container Deployment
+
+All four microservices can be launched with Docker Compose:
+- **`docker compose up --build -d`**: Compiles and launches all 4 services inside a private bridge network `ridelink-net`.
+- **Healthchecks**: Actuator `/actuator/health` probes ensure services start in the correct dependency order.
+- **Port Mapping**: Host ports `8081`, `8082`, `8083`, `8084` are mapped directly for Swagger UI and Postman access.
+

@@ -95,4 +95,67 @@ class AccountServiceTest {
         assertThrows(UnauthorizedException.class,
                 () -> service.login(new LoginRequest("passenger1", "nope")));
     }
+
+    @Test
+    void registerRejectsDuplicateUsername() {
+        when(accounts.existsByUsernameIgnoreCase("passenger1")).thenReturn(true);
+        RegisterRequest request = new RegisterRequest(
+                "passenger1", "password", "new@ridelink.local", "Passenger", "077", Role.PASSENGER);
+        assertThrows(com.ridelink.common.exception.ConflictException.class, () -> service.register(request));
+    }
+
+    @Test
+    void registerRejectsDuplicateEmail() {
+        when(accounts.existsByUsernameIgnoreCase("passenger2")).thenReturn(false);
+        when(accounts.existsByEmailIgnoreCase("p2@ridelink.local")).thenReturn(true);
+        RegisterRequest request = new RegisterRequest(
+                "passenger2", "password", "p2@ridelink.local", "Passenger", "077", Role.PASSENGER);
+        assertThrows(com.ridelink.common.exception.ConflictException.class, () -> service.register(request));
+    }
+
+    @Test
+    void loginRejectsNonExistentUser() {
+        when(accounts.findByUsernameIgnoreCase("ghost")).thenReturn(Optional.empty());
+        assertThrows(UnauthorizedException.class,
+                () -> service.login(new LoginRequest("ghost", "password")));
+    }
+
+    @Test
+    void updateProfileUpdatesFields() {
+        UUID id = UUID.randomUUID();
+        Account account = new Account();
+        account.setId(id);
+        account.setUsername("user1");
+        account.setEmail("old@ridelink.local");
+        account.setFullName("Old Name");
+        account.setRole(Role.PASSENGER);
+        account.setStatus(AccountStatus.ACTIVE);
+
+        when(accounts.findById(id)).thenReturn(Optional.of(account));
+        when(accounts.existsByEmailIgnoreCaseAndIdNot("new@ridelink.local", id)).thenReturn(false);
+        when(accounts.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var updated = service.updateProfile(id, new com.ridelink.account.dto.AccountDtos.UpdateProfileRequest(
+                "New Name", "new@ridelink.local", "0779999999"));
+
+        assertEquals("New Name", updated.fullName());
+        assertEquals("new@ridelink.local", updated.email());
+        assertEquals("0779999999", updated.phone());
+    }
+
+    @Test
+    void updateStatusModifiesAccountStatus() {
+        UUID id = UUID.randomUUID();
+        Account account = new Account();
+        account.setId(id);
+        account.setUsername("user1");
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setRole(Role.PASSENGER);
+
+        when(accounts.findById(id)).thenReturn(Optional.of(account));
+        when(accounts.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var updated = service.updateStatus(id, AccountStatus.SUSPENDED);
+        assertEquals(AccountStatus.SUSPENDED, updated.status());
+    }
 }

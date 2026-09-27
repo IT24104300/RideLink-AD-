@@ -65,4 +65,21 @@ public final class FareDtos {
             Instant createdAt
     ) {
     }
+
+    public record ReceiptResponse(
+            UUID id,
+            UUID paymentId,
+            UUID rideId,
+            UUID fareId,
+            UUID accountId,
+            String receiptNumber,
+            PaymentStatus status,
+            BigDecimal amount,
+            String currency,
+            String method,
+            String merchantName,
+            String summary,
+            Instant issuedAt
+    ) {
+    }
 }

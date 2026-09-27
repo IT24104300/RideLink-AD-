@@ -107,6 +107,56 @@ class RideServiceTest {
                 () -> service.recordPayment(ride.getId(), new RecordPaymentRequest(UUID.randomUUID()), passenger));
     }
 
+    @Test
+    void cancelAllowedForPassenger() {
+        Ride ride = requestedRide();
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+        when(rides.save(any(Ride.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var result = service.cancel(ride.getId(), passenger);
+        assertEquals(RideStatus.CANCELLED, result.status());
+    }
+
+    @Test
+    void cancelRejectsUnrelatedUser() {
+        Ride ride = requestedRide();
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+        UserPrincipal stranger = new UserPrincipal(UUID.randomUUID(), "stranger", "PASSENGER");
+
+        assertThrows(com.ridelink.common.exception.ForbiddenException.class,
+                () -> service.cancel(ride.getId(), stranger));
+    }
+
+    @Test
+    void acceptRejectsUnassignedDriver() {
+        Ride ride = requestedRide();
+        ride.setStatus(RideStatus.ASSIGNED);
+        ride.setDriverAccountId(UUID.randomUUID());
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+
+        UserPrincipal otherDriver = new UserPrincipal(UUID.randomUUID(), "otherDriver", "DRIVER");
+        assertThrows(com.ridelink.common.exception.ForbiddenException.class,
+                () -> service.accept(ride.getId(), otherDriver));
+    }
+
+    @Test
+    void completeGracefullyDegradesWhenFareServiceFails() {
+        Ride ride = requestedRide();
+        ride.setStatus(RideStatus.IN_PROGRESS);
+        UUID driverId = UUID.randomUUID();
+        ride.setDriverAccountId(driverId);
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+        when(rides.save(any(Ride.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(farePaymentClient.calculateFinal(eq(ride.getId()), any(), any(), any()))
+                .thenThrow(new com.ridelink.common.exception.UpstreamException("Fare service down"));
+
+        UserPrincipal driver = new UserPrincipal(driverId, "driver1", "DRIVER");
+        var result = service.complete(ride.getId(), driver, "Bearer test");
+
+        assertEquals(RideStatus.COMPLETED, result.status());
+        org.junit.jupiter.api.Assertions.assertTrue(result.fareNote().contains("pending"));
+    }
+
     private Ride requestedRide() {
         Ride ride = new Ride();
         ride.setId(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));

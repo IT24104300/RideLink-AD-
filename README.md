@@ -70,6 +70,26 @@ API Gateway, Eureka, and a config server are **not** one of the four core servic
 
 ## How to run locally
 
+### Option A: Running with Docker Compose (Recommended)
+
+To start all four microservices with one command (includes container healthchecks and internal network wiring):
+
+```bash
+docker compose up --build -d
+```
+
+View logs:
+```bash
+docker compose logs -f
+```
+
+Stop all services:
+```bash
+docker compose down
+```
+
+### Option B: Running with Maven Wrapper locally
+
 From the repository root (Windows PowerShell):
 
 ```powershell

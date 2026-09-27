@@ -69,4 +69,35 @@ class FarePaymentServiceTest {
         assertNotNull(result.receiptNumber());
         verify(rideServiceClient).attachPayment(rideId, result.id(), "Bearer test");
     }
+
+    @Test
+    void getReceiptReturnsDetailedReceipt() {
+        UUID paymentId = UUID.randomUUID();
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        payment.setRideId(UUID.randomUUID());
+        payment.setAccountId(UUID.randomUUID());
+        payment.setAmount(new BigDecimal("750.00"));
+        payment.setCurrency("LKR");
+        payment.setMethod("CARD_SIMULATED");
+        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setReceiptNumber("RL-12345678");
+
+        when(payments.findById(paymentId)).thenReturn(java.util.Optional.of(payment));
+
+        var receipt = service.getReceipt(paymentId);
+        assertEquals(paymentId, receipt.paymentId());
+        assertEquals("RL-12345678", receipt.receiptNumber());
+        assertEquals("RideLink Platforms Ltd", receipt.merchantName());
+        assertEquals(PaymentStatus.COMPLETED, receipt.status());
+    }
+
+    @Test
+    void getFareThrowsNotFoundWhenMissing() {
+        UUID missingId = UUID.randomUUID();
+        when(quotes.findById(missingId)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(com.ridelink.common.exception.NotFoundException.class,
+                () -> service.getFare(missingId));
+    }
 }

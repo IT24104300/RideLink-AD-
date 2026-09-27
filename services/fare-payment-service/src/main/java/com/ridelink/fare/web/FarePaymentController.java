@@ -5,6 +5,7 @@ import com.ridelink.fare.dto.FareDtos.EstimateRequest;
 import com.ridelink.fare.dto.FareDtos.FareResponse;
 import com.ridelink.fare.dto.FareDtos.PaymentRequest;
 import com.ridelink.fare.dto.FareDtos.PaymentResponse;
+import com.ridelink.fare.dto.FareDtos.ReceiptResponse;
 import com.ridelink.fare.service.FarePaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,7 +78,7 @@ public class FarePaymentController {
     @GetMapping("/api/payments/{id}/receipt")
     @PreAuthorize("hasAnyRole('PASSENGER','DRIVER','ADMIN')")
     @Operation(summary = "Retrieve a payment receipt record")
-    public PaymentResponse receipt(@PathVariable UUID id) {
-        return farePaymentService.getPayment(id);
+    public ReceiptResponse receipt(@PathVariable UUID id) {
+        return farePaymentService.getReceipt(id);
     }
 }
