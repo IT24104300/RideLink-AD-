@@ -68,17 +68,17 @@ public class FarePaymentController {
         );
     }
 
-    @GetMapping("/api/payments/{id}")
-    @PreAuthorize("hasAnyRole('PASSENGER','DRIVER','ADMIN')")
-    @Operation(summary = "Retrieve a payment")
-    public PaymentResponse getPayment(@PathVariable UUID id) {
-        return farePaymentService.getPayment(id);
-    }
-
     @GetMapping("/api/payments/{id}/receipt")
     @PreAuthorize("hasAnyRole('PASSENGER','DRIVER','ADMIN')")
     @Operation(summary = "Retrieve a payment receipt record")
     public ReceiptResponse receipt(@PathVariable UUID id) {
         return farePaymentService.getReceipt(id);
+    }
+
+    @GetMapping("/api/payments/{id}")
+    @PreAuthorize("hasAnyRole('PASSENGER','DRIVER','ADMIN')")
+    @Operation(summary = "Retrieve a payment")
+    public PaymentResponse getPayment(@PathVariable UUID id) {
+        return farePaymentService.getPayment(id);
     }
 }

@@ -80,6 +80,29 @@ class AccountControllerTest {
     }
 
     @Test
+    void meReturnsAuthenticatedAccount() throws Exception {
+        UUID accountId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        Instant now = Instant.now();
+        AccountResponse response = new AccountResponse(
+                accountId, "passenger1", "passenger1@ridelink.local", "Demo Passenger", "077",
+                Role.PASSENGER, AccountStatus.ACTIVE, now, now);
+        when(accountService.getById(accountId)).thenReturn(response);
+
+        var principal = new com.ridelink.common.security.UserPrincipal(accountId, "passenger1", "PASSENGER");
+        var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                principal, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_PASSENGER")));
+
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            mockMvc.perform(get("/api/accounts/me"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.username").value("passenger1"));
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
     void getByIdReturnsAccount() throws Exception {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();

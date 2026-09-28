@@ -61,14 +61,14 @@ public class AccountController {
         return accountService.updateProfile(SecurityUtils.currentUser().accountId(), request);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F-]{36}}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Admin: view any account")
     public AccountResponse getById(@PathVariable UUID id) {
         return accountService.getById(id);
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{id:[0-9a-fA-F-]{36}}/status")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Admin: activate or suspend an account")
     public AccountResponse updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateStatusRequest request) {

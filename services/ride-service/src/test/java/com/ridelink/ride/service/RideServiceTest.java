@@ -86,6 +86,21 @@ class RideServiceTest {
     }
 
     @Test
+    void completeRequestedRideReturnsInvalidTransition() {
+        Ride ride = requestedRide();
+        when(rides.findById(ride.getId())).thenReturn(Optional.of(ride));
+        UserPrincipal driver = new UserPrincipal(
+                UUID.fromString("22222222-2222-2222-2222-222222222222"),
+                "driver1",
+                "DRIVER"
+        );
+        BadRequestException ex = assertThrows(BadRequestException.class,
+                () -> service.complete(ride.getId(), driver, "Bearer test"));
+        assertEquals("INVALID_TRANSITION", ex.getCode());
+        assertEquals(RideStatus.REQUESTED, ride.getStatus());
+    }
+
+    @Test
     void recordPaymentAttachesIdOnCompletedRide() {
         Ride ride = requestedRide();
         ride.setStatus(RideStatus.COMPLETED);

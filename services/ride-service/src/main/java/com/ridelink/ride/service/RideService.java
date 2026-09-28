@@ -121,8 +121,14 @@ public class RideService {
     @Transactional
     public RideResponse complete(UUID rideId, UserPrincipal user, String authorizationHeader) {
         Ride ride = require(rideId);
+        if (!ride.getStatus().canTransitionTo(RideStatus.COMPLETED)) {
+            throw new BadRequestException(
+                    "INVALID_TRANSITION",
+                    "Cannot transition from " + ride.getStatus() + " to " + RideStatus.COMPLETED
+            );
+        }
         assertAssignedDriver(ride, user);
-        transition(ride, RideStatus.COMPLETED);
+        ride.setStatus(RideStatus.COMPLETED);
         try {
             FareView fare = farePaymentClient.calculateFinal(ride.getId(), ride.getPickup(), ride.getDestination(), authorizationHeader);
             if (fare != null) {

@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
 
@@ -86,12 +88,7 @@ public class FarePaymentService {
         }
         Payment saved = payments.save(payment);
         if (saved.getStatus() == PaymentStatus.COMPLETED && saved.getId() != null) {
-            try {
-                rideServiceClient.attachPayment(saved.getRideId(), saved.getId(), authorizationHeader);
-            } catch (UpstreamException ex) {
-                log.warn("Ride Service unavailable while attaching payment {} to ride {}: {}",
-                        saved.getId(), saved.getRideId(), ex.getMessage());
-            }
+            schedulePaymentAttach(saved.getRideId(), saved.getId(), authorizationHeader);
         }
         return toPayment(saved);
     }
@@ -123,6 +120,26 @@ public class FarePaymentService {
                 summary,
                 payment.getCreatedAt()
         );
+    }
+
+    private void schedulePaymentAttach(UUID rideId, UUID paymentId, String authorizationHeader) {
+        Runnable attach = () -> {
+            try {
+                rideServiceClient.attachPayment(rideId, paymentId, authorizationHeader);
+            } catch (UpstreamException ex) {
+                log.warn("Could not attach payment {} to ride {}: {}", paymentId, rideId, ex.getMessage());
+            }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    attach.run();
+                }
+            });
+        } else {
+            attach.run();
+        }
     }
 
     private FareResponse persistQuote(EstimateRequest request, FareType type) {

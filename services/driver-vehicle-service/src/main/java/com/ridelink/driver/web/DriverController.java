@@ -54,7 +54,7 @@ public class DriverController {
         return driverProfileService.findEligible(pickup);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F-]{36}}")
     @PreAuthorize("hasAnyRole('PASSENGER','DRIVER','ADMIN')")
     @Operation(summary = "Get a driver profile by id")
     public DriverResponse getById(@PathVariable UUID id) {

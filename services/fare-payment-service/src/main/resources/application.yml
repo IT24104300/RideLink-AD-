@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: fare-payment-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: ${FARE_DB_URL:jdbc:h2:file:./data/fare-db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
     username: ${FARE_DB_USER:sa}
