@@ -42,7 +42,7 @@ public class DriverSecurityConfig {
                         .title("RideLink Driver & Vehicle Service")
                         .version("0.1.0")
                         .description("Driver operational profile, vehicle, availability, location, eligible drivers."))
-                .servers(List.of(new Server().url("http://localhost:8082")))
+                .servers(List.of(new Server().url("/").description("This service (same origin as Swagger UI)")))
                 .components(new Components().addSecuritySchemes("bearer-jwt",
                         new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));

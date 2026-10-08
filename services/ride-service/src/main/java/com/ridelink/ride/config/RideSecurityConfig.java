@@ -69,7 +69,7 @@ public class RideSecurityConfig {
                         .title("RideLink Ride Management Service")
                         .version("0.1.0")
                         .description("Ride requests, driver assignment, and lifecycle transitions."))
-                .servers(List.of(new Server().url("http://localhost:8083")))
+                .servers(List.of(new Server().url("/").description("This service (same origin as Swagger UI)")))
                 .components(new Components().addSecuritySchemes("bearer-jwt",
                         new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));

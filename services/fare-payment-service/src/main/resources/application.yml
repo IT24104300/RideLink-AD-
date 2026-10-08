@@ -38,3 +38,4 @@ ridelink:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    persist-authorization: true
