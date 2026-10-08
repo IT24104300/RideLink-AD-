@@ -9,6 +9,7 @@ import com.ridelink.account.dto.AccountDtos.UpdateStatusRequest;
 import com.ridelink.account.service.AccountService;
 import com.ridelink.common.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -38,13 +39,15 @@ public class AccountController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Register a passenger or driver")
+    @SecurityRequirements
+    @Operation(summary = "Register a passenger or driver (public, no token needed)")
     public AccountResponse register(@Valid @RequestBody RegisterRequest request) {
         return accountService.register(request);
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticate and receive a JWT")
+    @SecurityRequirements
+    @Operation(summary = "Authenticate and receive a JWT (public, no token needed)")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return accountService.login(request);
     }
