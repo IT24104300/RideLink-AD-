@@ -27,6 +27,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for {@link RideService} business logic using Mockito.
+ * Tests ride assignment, state machine validation, payment recording, cancellation, and error handling.
+ */
 @ExtendWith(MockitoExtension.class)
 class RideServiceTest {
 
@@ -40,6 +44,9 @@ class RideServiceTest {
     private RideService service;
     private UserPrincipal passenger;
 
+    /**
+     * Initializes test subject and standard passenger principal before each test.
+     */
     @BeforeEach
     void setUp() {
         service = new RideService(rides, driverVehicleClient, farePaymentClient);
@@ -50,6 +57,9 @@ class RideServiceTest {
         );
     }
 
+    /**
+     * Verifies that assign picks the first eligible driver when no specific driver is requested.
+     */
     @Test
     void assignUsesFirstEligibleDriver() {
         Ride ride = requestedRide();

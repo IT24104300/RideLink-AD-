@@ -31,6 +31,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * WebMvc slice tests for {@link RideController}.
+ * Verifies HTTP endpoint routing, status codes, and serialization using MockMvc.
+ */
 @WebMvcTest(controllers = RideController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class RideControllerTest {
@@ -46,6 +50,9 @@ class RideControllerTest {
 
     private UUID passengerAccountId;
 
+    /**
+     * Sets up mock security context with a test passenger principal before each test.
+     */
     @BeforeEach
     void setUp() {
         passengerAccountId = UUID.randomUUID();
@@ -54,11 +61,17 @@ class RideControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    /**
+     * Clears security context after test execution.
+     */
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
+    /**
+     * Tests GET /api/rides/{id} returns 200 OK and expected JSON payload.
+     */
     @Test
     void getRideByIdReturnsRide() throws Exception {
         UUID rideId = UUID.randomUUID();
